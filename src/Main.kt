@@ -1,66 +1,83 @@
-
-
-class Libro(val titulo : String, val autor : String, val numPaginas : Int, val calificacion : Double){
+class Libro(val titulo: String, val autor: String, val numPaginas: Int, val calificacion: Double) {
     init {
-        require(titulo.isNotEmpty()){"No puede haber un titulo vacío"}
-        require(autor.isNotEmpty()){"No puede haber un autor vacío"}
-        require(calificacion in 0..10){"La calificacion debe estar entre 0 y 10"}
+        require(titulo.isNotEmpty()) { "No puede haber un título vacío" }
+        require(autor.isNotEmpty()) { "No puede haber un autor vacío" }
+        require(calificacion in 0.0..10.0) { "La calificación debe estar entre 0 y 10" }
+    }
+
+    override fun toString(): String {
+        return "Título: $titulo, Autor: $autor, Páginas: $numPaginas, Calificación: $calificacion"
     }
 }
 
-class ConjuntoLibros(){
-    val conjuntoLibros : Array<Libro?> = Array(5) { null }
-    fun añadirLibro(nuevoLibro : Libro) : Array<Libro?>{
-        var i = 0
-        if(i <= conjuntoLibros.size){
-            conjuntoLibros[i] = nuevoLibro
-            i += 1
-        }
-        return conjuntoLibros
-    }
+class ConjuntoLibros {
+    private val conjuntoLibros: Array<Libro?> = arrayOfNulls(5)
 
-    /* TO DO FUNCION PARA RELLENAR LOS NULL CON LIBROS QUE NO EXISTAN*/
-    fun añadirLibrosImaginarios(){
-
-    }
-    fun eliminarLibro(titulo: String,autor: String){
-        for (libro in conjuntoLibros){
-            if (libro?.autor == autor || libro?.titulo == titulo){
-                libro = null
+    fun añadirLibro(nuevoLibro: Libro): Boolean {
+        for (i in conjuntoLibros.indices) {
+            if (conjuntoLibros[i] == null) {
+                conjuntoLibros[i] = nuevoLibro
+                return true
             }
         }
+        println("No se pudo añadir el libro, el conjunto está lleno.")
+        return false
     }
+
+    fun eliminarLibro(titulo: String, autor: String) {
+        for (i in conjuntoLibros.indices) {
+            val libro = conjuntoLibros[i]
+            if (libro != null && (libro.titulo == titulo || libro.autor == autor)) {
+                conjuntoLibros[i] = null
+                println("Libro eliminado: $titulo por $autor")
+                return
+            }
+        }
+        println("No se encontró el libro con título \"$titulo\" o autor \"$autor\".")
+    }
+
     fun mostrarLibros() {
-        var menor: Libro
-        var mayor: Libro
+        val librosFiltrados = conjuntoLibros.filterNotNull()
+        if (librosFiltrados.isEmpty()) {
+            println("No hay libros en la colección.")
+            return
+        }
 
-        for(libro in conjuntoLibros){
-            if (menor.calificacion > libro.calificacion){
-                if (libro != null) {
-                    menor = libro
-                }
-            }
-            if (mayor.calificacion < libro.calificacion){
-                if (libro != null) {
-                    mayor = libro
-                }
+        val menor = librosFiltrados.minByOrNull { it.calificacion }
+        val mayor = librosFiltrados.maxByOrNull { it.calificacion }
+
+        println("Libro con mayor calificación: $mayor")
+        println("Libro con menor calificación: $menor")
+    }
+
+    fun mostrarContenido() {
+        println("Contenido del conjunto de libros:")
+        conjuntoLibros.forEach { libro ->
+            if (libro != null) {
+                println(libro)
             }
         }
-        println("El libro con mayor calificacion tiene la siguiente descripcion: $mayor")
-        println("El libro con menor calificacion tiene la siguiente descripcion: $menor")
-    }
-    fun mostrarContenido(){
-        println(conjuntoLibros)
     }
 }
 
 fun main() {
-    val libro1 = Libro("El moro", "Pepito Grillo",120,7.5)
-    val libro2 = Libro("La casa de mi abuela", "Manolo Cabeza de Bolo",180,4.3)
-    añadirLibro(libro1)
-    añadirLibro(libro2)
-    eliminarLibro(libro1.autor,libro1.titulo)
-    eliminarLibro(libro2.autor,libro2.titulo)
-    mostrarLibros()
-    mostrarContenido()
+    val biblioteca = ConjuntoLibros()
+
+    val libro1 = Libro("El moro", "Pepito Grillo", 120, 7.5)
+    val libro2 = Libro("La casa de mi abuela", "Manolo Cabeza de Bolo", 180, 4.3)
+
+    biblioteca.añadirLibro(libro1)
+    biblioteca.añadirLibro(libro2)
+
+    biblioteca.mostrarContenido()
+
+    biblioteca.eliminarLibro(libro1.titulo, libro1.autor)
+    biblioteca.eliminarLibro(libro2.titulo, libro2.autor)
+
+    biblioteca.mostrarLibros()
+
+    val libro3 = Libro("El principito", "Antoine de Saint-Exupéry", 96, 9.8)
+    biblioteca.añadirLibro(libro3)
+
+    biblioteca.mostrarContenido()
 }
